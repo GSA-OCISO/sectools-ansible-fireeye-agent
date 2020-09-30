@@ -1,0 +1,34 @@
+---
+
+- include_vars: ../vars/main.yml
+
+## temp section for removing ossec if present
+
+- name: remove ossec
+  apt:
+    name: ossec-hids-agent
+    state: absent
+
+- name: copy fireeye files to target
+  copy: src={{ item.src }} dest={{ item.dest }} mode=0770
+  with_items:
+    - { src: "{{ app_installer }}" , dest: "/tmp/{{ app_installer }}" }
+    - { src: "{{ app_config }}" , dest: "/tmp/{{ app_config }}" }
+    
+- name: run fireeye installer
+  apt:
+    update_cache: yes
+    deb: /tmp/{{ app_installer }}
+  become: yes
+  
+- name: run fireeye config
+  shell: /opt/fireeye/bin/xagt -i /tmp/{{ app_config }}
+  args:
+    creates: /var/lib/fireeye/xagt/main.db
+  become: yes
+  
+- name: restart xagt
+  service:
+    name: xagt
+    state: restarted
+  
