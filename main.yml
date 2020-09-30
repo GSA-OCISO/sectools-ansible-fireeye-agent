@@ -1,0 +1,4 @@
+---
+
+app_installer: xagt_30.19.3-1.ubuntu16_amd64.deb
+app_config: agent_config.json
